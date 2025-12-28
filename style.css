@@ -193,3 +193,85 @@ button:disabled {
 .leaflet-popup-tip {
     background: #1a1a1a;
 }
+
+/* ============= MOBILE RESPONSIVE ============= */
+
+@media screen and (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+
+    #sidebar {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        max-height: 60vh;
+        overflow-y: auto;
+        padding: 15px;
+    }
+
+    #map {
+        width: 100%;
+        height: 40vh;
+        min-height: 300px;
+    }
+
+    select, button {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+    }
+
+    .subtitle {
+        font-size: 0.8rem;
+    }
+
+    #stats {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+
+    #comparison {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+
+    .algo-result {
+        padding: 8px;
+    }
+
+    .legend {
+        padding: 8px;
+    }
+
+    .legend-item {
+        font-size: 0.8rem;
+    }
+}
+
+/* For very small phones */
+@media screen and (max-width: 480px) {
+    #sidebar {
+        padding: 10px;
+    }
+
+    h2 {
+        font-size: 1.1rem;
+    }
+
+    select, button {
+        font-size: 0.85rem;
+        padding: 6px;
+    }
+
+    #map {
+        height: 35vh;
+    }
+
+    #stats p, #comparison p {
+        font-size: 0.8rem;
+    }
+}
