@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hubli Emergency Routing System</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="sidebar">
+        <h2>🚑 Smart Dispatch</h2>
+        <p class="subtitle">Hubli-Dharwad Emergency System</p>
+        <hr>
+        
+        <label>Emergency Location:</label>
+        <select id="emergencyLocation">
+            <optgroup label="Central Hubli">
+                <option value="0">Unkal Lake Area</option>
+                <option value="1">Vidyanagar Circle</option>
+                <option value="2">Old Hubli Market</option>
+                <option value="3">Gokul Road</option>
+                <option value="11">Deshpande Nagar</option>
+                <option value="14">Vidyagiri</option>
+                <option value="20">Club House Circle</option>
+                <option value="21">Gandhi Nagar</option>
+            </optgroup>
+            <optgroup label="North Hubli">
+                <option value="7">Keshwapur</option>
+                <option value="15">Adarsh Nagar</option>
+                <option value="16">Gabbur</option>
+                <option value="22">Kakati Nagar</option>
+            </optgroup>
+            <optgroup label="South Hubli">
+                <option value="9">KLE College Area</option>
+                <option value="12">Lingarajapuram</option>
+                <option value="17">Amargol</option>
+                <option value="23">Rayapur</option>
+            </optgroup>
+            <optgroup label="East Hubli">
+                <option value="6">BRTS Bus Stand</option>
+                <option value="10">BVB College Area</option>
+                <option value="13">Tolankere</option>
+                <option value="18">Shirur Park</option>
+                <option value="24">Gadag Road</option>
+            </optgroup>
+            <optgroup label="West Hubli">
+                <option value="4">Hosur Cross</option>
+                <option value="8">Navanagar</option>
+                <option value="19">Tarihal</option>
+                <option value="25">Akshay Park</option>
+            </optgroup>
+            <optgroup label="Transport Hubs">
+                <option value="5">Hubli Railway Station</option>
+                <option value="26">KSRTC Bus Stand</option>
+                <option value="27">Hubli Airport</option>
+            </optgroup>
+            <optgroup label="Industrial/Commercial">
+                <option value="28">Industrial Estate</option>
+                <option value="29">Kusugal</option>
+                <option value="30">Ranebennur Road</option>
+            </optgroup>
+        </select>
+
+        <label>Nearest Hospital:</label>
+        <select id="hospitalSelect">
+            <optgroup label="Multi-Specialty Hospitals">
+                <option value="0">KIMS Hospital (Multi-Specialty)</option>
+                <option value="1">SDM Hospital (Multi-Specialty)</option>
+                <option value="3">Narayana Hrudayalaya (Heart)</option>
+                <option value="4">Apollo BGS Hospital</option>
+                <option value="5">KLE Hospital & Medical Centre</option>
+            </optgroup>
+            <optgroup label="Government Hospitals">
+                <option value="2">District Hospital (Govt)</option>
+                <option value="6">Civil Hospital</option>
+                <option value="7">KIMS Govt Medical College</option>
+            </optgroup>
+            <optgroup label="Specialty & Private">
+                <option value="8">Sushruta Hospital</option>
+                <option value="9">Akshay Hospital</option>
+                <option value="10">Sai Hospital</option>
+                <option value="11">Niramay Hospital</option>
+            </optgroup>
+        </select>
+
+        <label>Emergency Priority:</label>
+        <select id="priority">
+            <option value="critical">🔴 Code Red (Critical - Cardiac)</option>
+            <option value="moderate">🟡 Code Yellow (Moderate)</option>
+            <option value="minor">🟢 Code Green (Minor)</option>
+        </select>
+
+        <button id="dispatchBtn" onclick="dispatchAmbulance()">🚨 Dispatch Vehicle</button>
+        <button onclick="clearRoutes()">Clear Routes</button>
+
+        <div class="traffic-sim">
+            <strong>Traffic Simulation:</strong>
+            <p>Status: <span id="trafficStatus">Active</span></p>
+            <p>Update Interval: 30 seconds</p>
+        </div>
+
+        <div id="stats">
+            <p><strong>Status:</strong> <span id="statusText">Ready</span></p>
+            <p><strong>Algorithm:</strong> Dijkstra's (Optimal)</p>
+            <p><strong>ETA:</strong> <span id="etaText">--</span></p>
+            <p><strong>Distance:</strong> <span id="distanceText">--</span></p>
+        </div>
+
+        <div id="comparison">
+            <h3>📊 Algorithm Analysis</h3>
+            <div id="comparisonResults"></div>
+        </div>
+
+        <div class="legend">
+            <h4>Map Legend</h4>
+            <div class="legend-item">
+                <div class="legend-color hospital"></div>
+                <span>Hospital</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color emergency"></div>
+                <span>Emergency Location</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color ambulance"></div>
+                <span>Ambulance Position</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
