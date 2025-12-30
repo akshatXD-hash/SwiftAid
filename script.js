@@ -219,21 +219,19 @@ let markerLayers = [];
 
 const cityGraph = new Graph();
 
-// ============= ACCURATE HOSPITAL COORDINATES =============
-// Updated to match actual hospital locations on OpenStreetMap
-
-cityGraph.addNode('H0', 15.3647, 75.1378, 'KIMS Hospital');
-cityGraph.addNode('H1', 15.3484, 75.1242, 'SDM Hospital');
-cityGraph.addNode('H2', 15.3426, 75.1137, 'District Hospital');
-cityGraph.addNode('H3', 15.3782, 75.1241, 'Narayana Hrudayalaya');
-cityGraph.addNode('H4', 15.3598, 75.1421, 'Apollo BGS Hospital');
-cityGraph.addNode('H5', 15.3462, 75.1385, 'KLE Hospital & Medical Centre');
-cityGraph.addNode('H6', 15.3512, 75.1274, 'Civil Hospital');
-cityGraph.addNode('H7', 15.3689, 75.1342, 'KIMS Govt Medical College');
-cityGraph.addNode('H8', 15.3612, 75.1296, 'Sushruta Hospital');
-cityGraph.addNode('H9', 15.3715, 75.1089, 'Akshay Hospital');
-cityGraph.addNode('H10', 15.3572, 75.1412, 'Sai Hospital');
-cityGraph.addNode('H11', 15.3634, 75.1254, 'Niramay Hospital');
+// Add nodes (same as before)
+cityGraph.addNode('H0', 15.3780, 75.1350, 'KIMS Hospital');
+cityGraph.addNode('H1', 15.3550, 75.1180, 'SDM Hospital');
+cityGraph.addNode('H2', 15.3450, 75.1100, 'District Hospital');
+cityGraph.addNode('H3', 15.3820, 75.1280, 'Narayana Hrudayalaya');
+cityGraph.addNode('H4', 15.3650, 75.1400, 'Apollo BGS Hospital');
+cityGraph.addNode('H5', 15.3520, 75.1430, 'KLE Hospital & Medical Centre');
+cityGraph.addNode('H6', 15.3490, 75.1250, 'Civil Hospital');
+cityGraph.addNode('H7', 15.3730, 75.1330, 'KIMS Govt Medical College');
+cityGraph.addNode('H8', 15.3600, 75.1300, 'Sushruta Hospital');
+cityGraph.addNode('H9', 15.3700, 75.1100, 'Akshay Hospital');
+cityGraph.addNode('H10', 15.3580, 75.1380, 'Sai Hospital');
+cityGraph.addNode('H11', 15.3620, 75.1220, 'Niramay Hospital');
 
 cityGraph.addNode('E0', 15.3850, 75.1280, 'Unkal Lake Area');
 cityGraph.addNode('E1', 15.3720, 75.1420, 'Vidyanagar Circle');
