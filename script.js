@@ -12,7 +12,6 @@ class Graph {
     addEdge(from, to, baseWeight) {
         const key = `${from}-${to}`;
         this.edges.set(key, { from, to, baseWeight, currentWeight: baseWeight });
-        // Add reverse edge
         const reverseKey = `${to}-${from}`;
         this.edges.set(reverseKey, { from: to, to: from, baseWeight, currentWeight: baseWeight });
     }
@@ -28,7 +27,6 @@ class Graph {
     }
 
     updateTrafficWeights() {
-        // Simulate traffic changes (0.8x to 1.2x of base weight)
         this.edges.forEach((edge, key) => {
             const trafficMultiplier = 0.8 + Math.random() * 0.4;
             edge.currentWeight = edge.baseWeight * trafficMultiplier;
@@ -36,7 +34,7 @@ class Graph {
     }
 }
 
-// ============= PRIORITY QUEUE FOR A* AND DIJKSTRA =============
+// ============= PRIORITY QUEUE =============
 class PriorityQueue {
     constructor() {
         this.items = [];
@@ -56,7 +54,7 @@ class PriorityQueue {
     }
 }
 
-// ============= DIJKSTRA ALGORITHM (PRIMARY) =============
+// ============= DIJKSTRA ALGORITHM =============
 function dijkstraSearch(graph, start, goal, priorityLevel) {
     const startTime = performance.now();
     const distances = new Map();
@@ -64,9 +62,8 @@ function dijkstraSearch(graph, start, goal, priorityLevel) {
     const unvisited = new PriorityQueue();
     let nodesExplored = 0;
 
-    // Priority multipliers affect edge weights
     const priorityMultipliers = {
-        'critical': 0.85,  // Critical emergencies get slight speed boost
+        'critical': 0.85,
         'moderate': 1.0,
         'minor': 1.15
     };
@@ -96,7 +93,6 @@ function dijkstraSearch(graph, start, goal, priorityLevel) {
 
         const neighbors = graph.getNeighbors(current);
         for (const { node, weight } of neighbors) {
-            // Apply priority multiplier to edge weights
             const adjustedWeight = weight * multiplier;
             const alt = distances.get(current) + adjustedWeight;
             if (alt < distances.get(node)) {
@@ -110,7 +106,7 @@ function dijkstraSearch(graph, start, goal, priorityLevel) {
     return null;
 }
 
-// ============= DYNAMIC PROGRAMMING (FLOYD-WARSHALL) =============
+// ============= DYNAMIC PROGRAMMING =============
 let dpPrecomputed = null;
 
 function floydWarshall(graph) {
@@ -119,7 +115,6 @@ function floydWarshall(graph) {
     const dist = new Map();
     const next = new Map();
 
-    // Initialize distances
     nodes.forEach(i => {
         nodes.forEach(j => {
             const key = `${i}-${j}`;
@@ -133,7 +128,6 @@ function floydWarshall(graph) {
         });
     });
 
-    // Floyd-Warshall main algorithm
     nodes.forEach(k => {
         nodes.forEach(i => {
             nodes.forEach(j => {
@@ -153,11 +147,7 @@ function floydWarshall(graph) {
     });
 
     const endTime = performance.now();
-    return { 
-        dist, 
-        next, 
-        computeTime: (endTime - startTime).toFixed(2) 
-    };
+    return { dist, next, computeTime: (endTime - startTime).toFixed(2) };
 }
 
 function getDPPath(start, goal, dpResult) {
@@ -175,7 +165,7 @@ function getDPPath(start, goal, dpResult) {
     return {
         path,
         cost: dpResult.dist.get(`${start}-${goal}`),
-        time: '< 0.01', // Instant lookup from precomputed cache
+        time: '< 0.01',
         nodesExplored: 0
     };
 }
@@ -190,16 +180,46 @@ function reconstructPath(cameFrom, current) {
     return path;
 }
 
+// ============= FETCH ACTUAL ROAD ROUTE =============
+// ============= FETCH ACTUAL ROAD ROUTE (SIMPLIFIED) =============
+async function fetchRoadRoute(startNodeId, endNodeId) {
+    const startNode = cityGraph.nodes.get(startNodeId);
+    const endNode = cityGraph.nodes.get(endNodeId);
+    
+    const coordinates = `${startNode.lng},${startNode.lat};${endNode.lng},${endNode.lat}`;
+
+    try {
+        const response = await fetch(
+            `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`
+        );
+        const data = await response.json();
+
+        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+            return {
+                coordinates: data.routes[0].geometry.coordinates,
+                distance: data.routes[0].distance / 1000 // Convert to km
+            };
+        }
+    } catch (error) {
+        console.log('OSRM routing unavailable, using straight line');
+    }
+
+    // Fallback: straight line
+    return {
+        coordinates: [[startNode.lng, startNode.lat], [endNode.lng, endNode.lat]],
+        distance: null
+    };
+}
+
 // ============= MAP AND GRAPH INITIALIZATION =============
 const hubliCoords = [15.3647, 75.1240];
 let map;
 let routeLayers = [];
 let markerLayers = [];
 
-// Create the city graph
 const cityGraph = new Graph();
 
-// Add hospital nodes (12 hospitals)
+// Add nodes (same as before)
 cityGraph.addNode('H0', 15.3780, 75.1350, 'KIMS Hospital');
 cityGraph.addNode('H1', 15.3550, 75.1180, 'SDM Hospital');
 cityGraph.addNode('H2', 15.3450, 75.1100, 'District Hospital');
@@ -213,7 +233,6 @@ cityGraph.addNode('H9', 15.3700, 75.1100, 'Akshay Hospital');
 cityGraph.addNode('H10', 15.3580, 75.1380, 'Sai Hospital');
 cityGraph.addNode('H11', 15.3620, 75.1220, 'Niramay Hospital');
 
-// Add emergency location nodes (31 locations across Hubli-Dharwad)
 cityGraph.addNode('E0', 15.3850, 75.1280, 'Unkal Lake Area');
 cityGraph.addNode('E1', 15.3720, 75.1420, 'Vidyanagar Circle');
 cityGraph.addNode('E2', 15.3580, 75.1250, 'Old Hubli Market');
@@ -246,7 +265,6 @@ cityGraph.addNode('E28', 15.3550, 75.1050, 'Industrial Estate');
 cityGraph.addNode('E29', 15.3510, 75.0950, 'Kusugal');
 cityGraph.addNode('E30', 15.3380, 75.1150, 'Ranebennur Road');
 
-// Add intermediate junction nodes (expanded network)
 cityGraph.addNode('I0', 15.3700, 75.1200, 'Junction 1');
 cityGraph.addNode('I1', 15.3600, 75.1150, 'Junction 2');
 cityGraph.addNode('I2', 15.3650, 75.1300, 'Junction 3');
@@ -258,8 +276,7 @@ cityGraph.addNode('I7', 15.3800, 75.1200, 'Junction 8');
 cityGraph.addNode('I8', 15.3550, 75.1350, 'Junction 9');
 cityGraph.addNode('I9', 15.3650, 75.1450, 'Junction 10');
 
-// Add edges with base weights (distances in km)
-// Original emergency locations to hospitals/junctions
+// Add all edges (same as before - keeping your existing edges)
 cityGraph.addEdge('E0', 'H0', 1.2);
 cityGraph.addEdge('E0', 'I0', 1.8);
 cityGraph.addEdge('E0', 'I7', 1.0);
@@ -275,8 +292,6 @@ cityGraph.addEdge('E3', 'I8', 0.9);
 cityGraph.addEdge('E4', 'I1', 1.5);
 cityGraph.addEdge('E4', 'H2', 2.2);
 cityGraph.addEdge('E4', 'H9', 1.0);
-
-// Emergency locations E5-E14
 cityGraph.addEdge('E5', 'H1', 0.9);
 cityGraph.addEdge('E5', 'I3', 0.6);
 cityGraph.addEdge('E5', 'H6', 0.7);
@@ -307,8 +322,6 @@ cityGraph.addEdge('E13', 'I9', 0.7);
 cityGraph.addEdge('E14', 'I0', 0.6);
 cityGraph.addEdge('E14', 'H0', 1.0);
 cityGraph.addEdge('E14', 'I7', 0.5);
-
-// New emergency locations E15-E30
 cityGraph.addEdge('E15', 'I7', 0.8);
 cityGraph.addEdge('E15', 'H0', 1.2);
 cityGraph.addEdge('E15', 'H3', 1.0);
@@ -357,8 +370,6 @@ cityGraph.addEdge('E29', 'E30', 0.8);
 cityGraph.addEdge('E30', 'H2', 0.9);
 cityGraph.addEdge('E30', 'I4', 0.7);
 cityGraph.addEdge('E30', 'H6', 0.8);
-
-// Hospital to junction connections
 cityGraph.addEdge('H0', 'I0', 1.5);
 cityGraph.addEdge('H0', 'I2', 1.3);
 cityGraph.addEdge('H0', 'I6', 0.8);
@@ -387,55 +398,6 @@ cityGraph.addEdge('H10', 'I5', 0.5);
 cityGraph.addEdge('H10', 'I9', 0.9);
 cityGraph.addEdge('H11', 'I2', 0.6);
 cityGraph.addEdge('H11', 'I0', 0.7);
-
-// Junction to junction connections (expanded network)
-cityGraph.addEdge('I0', 'I1', 1.2);
-cityGraph.addEdge('I0', 'I2', 0.9);
-cityGraph.addEdge('I0', 'I7', 0.8);
-cityGraph.addEdge('I1', 'I4', 0.8);
-cityGraph.addEdge('I2', 'I3', 1.0);
-cityGraph.addEdge('I2', 'I5', 1.1);
-cityGraph.addEdge('I2', 'I6', 0.7);
-cityGraph.addEdge('I3', 'I4', 0.7);
-cityGraph.addEdge('I3', 'I8', 0.6);
-cityGraph.addEdge('I4', 'H1', 1.0);
-cityGraph.addEdge('I5', 'H0', 1.4);
-cityGraph.addEdge('I5', 'I6', 0.8);
-cityGraph.addEdge('I5', 'I9', 0.9);
-cityGraph.addEdge('I6', 'I7', 0.7);
-cityGraph.addEdge('I7', 'I0', 0.8);
-cityGraph.addEdge('I8', 'I5', 1.0);
-cityGraph.addEdge('I9', 'I6', 0.8);
-
-cityGraph.addEdge('H0', 'I0', 1.5);
-cityGraph.addEdge('H0', 'I2', 1.3);
-cityGraph.addEdge('H0', 'I6', 0.8);
-cityGraph.addEdge('H0', 'I7', 0.9);
-cityGraph.addEdge('H1', 'I3', 1.0);
-cityGraph.addEdge('H1', 'I1', 0.9);
-cityGraph.addEdge('H1', 'I8', 1.1);
-cityGraph.addEdge('H2', 'I4', 0.7);
-cityGraph.addEdge('H2', 'I1', 1.1);
-cityGraph.addEdge('H3', 'I7', 0.6);
-cityGraph.addEdge('H3', 'I6', 0.9);
-cityGraph.addEdge('H4', 'I5', 0.8);
-cityGraph.addEdge('H4', 'I9', 0.7);
-cityGraph.addEdge('H4', 'I6', 0.6);
-cityGraph.addEdge('H5', 'I8', 0.8);
-cityGraph.addEdge('H5', 'I9', 1.0);
-cityGraph.addEdge('H6', 'I3', 0.6);
-cityGraph.addEdge('H6', 'I4', 0.5);
-cityGraph.addEdge('H7', 'I6', 0.5);
-cityGraph.addEdge('H7', 'I2', 0.8);
-cityGraph.addEdge('H8', 'I2', 0.7);
-cityGraph.addEdge('H8', 'I3', 0.6);
-cityGraph.addEdge('H9', 'I1', 0.8);
-cityGraph.addEdge('H9', 'I0', 1.0);
-cityGraph.addEdge('H10', 'I5', 0.5);
-cityGraph.addEdge('H10', 'I9', 0.9);
-cityGraph.addEdge('H11', 'I2', 0.6);
-cityGraph.addEdge('H11', 'I0', 0.7);
-
 cityGraph.addEdge('I0', 'I1', 1.2);
 cityGraph.addEdge('I0', 'I2', 0.9);
 cityGraph.addEdge('I0', 'I7', 0.8);
@@ -456,7 +418,6 @@ cityGraph.addEdge('I9', 'I6', 0.8);
 
 // ============= MAP INITIALIZATION =============
 window.onload = function() {
-    // Initialize Leaflet map
     map = L.map('map', {
         center: hubliCoords,
         zoom: 13,
@@ -468,15 +429,12 @@ window.onload = function() {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Add markers for all locations
     addLocationMarkers();
 
-    // Precompute DP cache
     console.log('Precomputing Floyd-Warshall paths...');
     dpPrecomputed = floydWarshall(cityGraph);
     console.log(`DP precomputation completed in ${dpPrecomputed.computeTime}ms`);
 
-    // Start traffic simulation
     setInterval(() => {
         cityGraph.updateTrafficWeights();
         document.getElementById('trafficStatus').textContent = 'Updated';
@@ -490,9 +448,8 @@ window.onload = function() {
     }, 300);
 };
 
-// ============= ADD MARKERS TO MAP =============
+// ============= ADD MARKERS =============
 function addLocationMarkers() {
-    // Hospital markers (blue) - 12 hospitals
     const hospitals = ['H0', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10', 'H11'];
     hospitals.forEach(id => {
         const node = cityGraph.nodes.get(id);
@@ -507,7 +464,6 @@ function addLocationMarkers() {
         markerLayers.push(marker);
     });
 
-    // Emergency location markers (red) - 31 locations
     const emergencies = ['E0', 'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 
                          'E10', 'E11', 'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18', 'E19',
                          'E20', 'E21', 'E22', 'E23', 'E24', 'E25', 'E26', 'E27', 'E28', 'E29', 'E30'];
@@ -525,8 +481,8 @@ function addLocationMarkers() {
     });
 }
 
-// ============= DISPATCH AMBULANCE FUNCTION =============
-function dispatchAmbulance() {
+// ============= DISPATCH AMBULANCE (UPDATED) =============
+async function dispatchAmbulance() {
     const emergencyIdx = document.getElementById('emergencyLocation').value;
     const hospitalIdx = document.getElementById('hospitalSelect').value;
     const priority = document.getElementById('priority').value;
@@ -534,52 +490,55 @@ function dispatchAmbulance() {
     const emergencyId = `E${emergencyIdx}`;
     const hospitalId = `H${hospitalIdx}`;
 
-    // Update status
     document.getElementById('statusText').textContent = 'Computing optimal route...';
     document.getElementById('dispatchBtn').disabled = true;
 
-    // Clear previous routes
     clearRoutes();
 
-    // Run Dijkstra and DP algorithms
-    setTimeout(() => {
+    setTimeout(async () => {
+        // Run Dijkstra to calculate optimal cost/distance through our graph
         const dijkstraResult = dijkstraSearch(cityGraph, emergencyId, hospitalId, priority);
         const dpResult = getDPPath(emergencyId, hospitalId, dpPrecomputed);
 
-        // Display best route on map (Dijkstra)
         if (dijkstraResult) {
-            drawRoute(dijkstraResult.path, '#4dff4d', 'Optimal Route (Dijkstra)');
-            const eta = Math.round(dijkstraResult.cost * 2); // Rough ETA: 2 min per km
+            // Fetch actual road route DIRECTLY from start to end (not through intermediate nodes)
+            document.getElementById('statusText').textContent = 'Fetching road route...';
+            const roadRoute = await fetchRoadRoute(emergencyId, hospitalId);
+            
+            // Draw route following actual roads
+            await drawRoute(roadRoute.coordinates, [emergencyId, hospitalId], '#4dff4d', 'Optimal Route (Dijkstra)');
+            
+            // Use Dijkstra's calculated distance (from our graph) or OSRM's real distance
+            const displayDistance = roadRoute.distance || dijkstraResult.cost;
+            const eta = Math.round(displayDistance * 2);
+            
             document.getElementById('etaText').textContent = `${eta} minutes`;
-            document.getElementById('distanceText').textContent = `${dijkstraResult.cost.toFixed(2)} km`;
+            document.getElementById('distanceText').textContent = `${displayDistance.toFixed(2)} km`;
             document.getElementById('statusText').textContent = '✓ Route Active';
         }
 
-        // Display comparison between Dijkstra and DP
         displayComparison(dijkstraResult, dpResult);
-
         document.getElementById('dispatchBtn').disabled = false;
     }, 100);
 }
 
-// ============= DRAW ROUTE ON MAP =============
-function drawRoute(path, color, label) {
-    const coordinates = path.map(nodeId => {
-        const node = cityGraph.nodes.get(nodeId);
-        return [node.lat, node.lng];
-    });
+// ============= DRAW ROUTE WITH REAL ROADS =============
+async function drawRoute(roadCoordinates, nodePath, color, label) {
+    // Convert OSRM format [lng, lat] to Leaflet format [lat, lng]
+    const leafletCoords = roadCoordinates.map(coord => [coord[1], coord[0]]);
 
-    const polyline = L.polyline(coordinates, {
+    const polyline = L.polyline(leafletCoords, {
         color: color,
-        weight: 4,
-        opacity: 0.8
+        weight: 5,
+        opacity: 0.7,
+        lineJoin: 'round'
     }).addTo(map);
 
     polyline.bindPopup(`<b>${label}</b>`);
     routeLayers.push(polyline);
 
     // Add ambulance marker at start
-    const startNode = cityGraph.nodes.get(path[0]);
+    const startNode = cityGraph.nodes.get(nodePath[0]);
     const ambulanceMarker = L.marker([startNode.lat, startNode.lng], {
         icon: L.divIcon({
             html: '🚑',
@@ -597,7 +556,6 @@ function displayComparison(dijkstra, dp) {
     const comparisonDiv = document.getElementById('comparison');
     const resultsDiv = document.getElementById('comparisonResults');
     
-    // Compare Dijkstra vs DP
     const results = [
         { name: 'Dijkstra (Live Routing)', data: dijkstra, desc: 'Real-time pathfinding with traffic' },
         { name: 'DP - Floyd-Warshall (Cached)', data: dp, desc: 'Pre-computed shortest paths' }
@@ -625,7 +583,6 @@ function displayComparison(dijkstra, dp) {
         }
     });
     
-    // Add explanation
     const explanation = document.createElement('div');
     explanation.style.cssText = 'margin-top: 15px; padding: 10px; background: #1a1a1a; border-radius: 4px; font-size: 0.85rem; color: #ccc;';
     explanation.innerHTML = `
@@ -643,7 +600,6 @@ function clearRoutes() {
     routeLayers.forEach(layer => map.removeLayer(layer));
     routeLayers = [];
     
-    // Remove ambulance markers only (keep hospital and emergency markers)
     markerLayers.forEach(marker => {
         if (marker.options.icon) {
             map.removeLayer(marker);
