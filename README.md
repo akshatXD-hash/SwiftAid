@@ -58,7 +58,7 @@ SwiftAid is a comprehensive emergency vehicle routing system designed for Hubli-
 
 ### **Academic Information**
 - **Course**: Design and Analysis of Algorithms (DAA)
-- **Institution**: [Your Institution Name]
+- **Institution**: KLE TECHNOLOGICAL UNIVERSITY,HUBLI
 - **Academic Year**: 2024-2025
 - **Project Type**: Algorithm Implementation & Comparative Analysis
 
