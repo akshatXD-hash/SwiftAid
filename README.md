@@ -4,7 +4,7 @@
 [![GitHub](https://img.shields.io/badge/github-SwiftAid-blue)](https://github.com/akshatXD-hash/SwiftAid)
 [![Status](https://img.shields.io/badge/status-active-brightgreen)]()
 
-> **Help arrives faster with SwiftAid.** An intelligent emergency dispatch system that uses advanced graph algorithms to optimize ambulance routing across Hubli-Dharwad, reducing response times and saving lives.
+> **Help arrives faster with Swiftaid.** An intelligent emergency dispatch system that uses advanced graph algorithms to optimize ambulance routing across Hubli-Dharwad, reducing response times and saving lives.
 
 ![SwiftAid Demo](https://img.shields.io/badge/Response_Time-Sub_2ms-brightgreen) ![Coverage](https://img.shields.io/badge/Coverage-31_Locations-blue) ![Hospitals](https://img.shields.io/badge/Hospitals-12-orange)
 
